@@ -67,22 +67,36 @@ void Translator(vector<string>* pr_content, string file_name) {
             case 1: // ADD
                 // add eax, [op1]
                 if(tokens.at(0).back() == ':') {  // quando tem rotulo
-                    instr = tokens.at(0) + " " + tokens.at(1) + " EAX, [" + tokens.at(2) + "]\n";
+                    instr = tokens.at(0) + " add eax, [" + tokens.at(2) + "]\n";
                 } else {
-                    instr = tokens.at(0) + " EAX, [" + tokens.at(1) + "]\n";
+                    instr = "add eax, [" + tokens.at(1) + "]\n";
                 }
                 break;
             case 2: // SUB
                 // sub eax, [op1]
                 if(tokens.at(0).back() == ':') {
-                    instr = tokens.at(0) + " " + tokens.at(1) + " EAX, [" + tokens.at(2) + "]\n";
+                    instr = tokens.at(0) + " sub eax, [" + tokens.at(2) + "]\n";
                 } else {
-                    instr = tokens.at(0) + " EAX, [" + tokens.at(1) + "]\n";
+                    instr = "sub eax, [" + tokens.at(1) + "]\n";
                 }
                 break;
             case 3: // MUL
+                // mov ebx, [op1]
+	            // imul ebx
+                if(tokens.at(0).back() == ':') {
+                    instr = tokens.at(0) + " mov ebx, [" + tokens.at(2) + "]\nimul ebx\n";
+                } else {
+                    instr = "mov ebx, [" + tokens.at(1) + "]\nimul ebx\n";
+                }
                 break;
             case 4: // DIV
+                // mov ebx, [op1]
+	            // idiv ebx
+                if(tokens.at(0).back() == ':') {
+                    instr = tokens.at(0) + " mov ebx, [" + tokens.at(2) + "]\nidiv ebx\n";
+                } else {
+                    instr = "mov ebx, [" + tokens.at(1) + "]\nidiv ebx\n";
+                }
                 break;
             case 5: // JMP
                 // jmp label
@@ -96,77 +110,87 @@ void Translator(vector<string>* pr_content, string file_name) {
                 // cmp eax, 0
 	            // jl label
                 if(tokens.at(0).back() == ':') {
-                    instr = tokens.at(0) + " CMP EAX, 0\n";
+                    instr = tokens.at(0) + " cmp eax, 0\n";
                     instr += "jl " + tokens.at(2) + "\n";
                 } else {
-                    instr = "CMP EAX, 0\n";
-                    instr += "JL " + tokens.at(1) + "\n";
+                    instr = "cmp eax, 0\n";
+                    instr += "jl " + tokens.at(1) + "\n";
                 }
                 break;
             case 7: // JMPP
                 // cmp eax, 0
 	            // jg label
                 if(tokens.at(0).back() == ':') {
-                    instr = tokens.at(0) + " CMP EAX, 0\n";
-                    instr += "JG " + tokens.at(2) + "\n";
+                    instr = tokens.at(0) + " cmp eax, 0\n";
+                    instr += "jg " + tokens.at(2) + "\n";
                 } else {
-                    instr = "CMP EAX, 0\n";
-                    instr += "JG " + tokens.at(1) + "\n";
+                    instr = "cmp eax, 0\n";
+                    instr += "jg " + tokens.at(1) + "\n";
                 }
                 break;
             case 8: // JMPZ
                 // cmp eax, 0
 	            // jz label
                 if(tokens.at(0).back() == ':') {
-                    instr = tokens.at(0) + " CMP EAX, 0\n";
-                    instr += "JZ " + tokens.at(2) + "\n";
+                    instr = tokens.at(0) + " cmp eax, 0\n";
+                    instr += "jz " + tokens.at(2) + "\n";
                 } else {
-                    instr = "CMP EAX, 0\n";
-                    instr = "JZ " + tokens.at(1) + "\n";
+                    instr = "cmp eax, 0\n";
+                    instr = "jz " + tokens.at(1) + "\n";
                 }
                 break;
             case 9: // COPY
                 // mov ebx, [op1]
 	            // mov [op2], ebx
                 if(tokens.at(0).back() == ':') {
-                    instr = tokens.at(0) + " MOV EBX, [" + tokens.at(2) + "]\n";
+                    instr = tokens.at(0) + " mov ebx, [" + tokens.at(2) + "]\n";
                     instr += "[" + tokens.at(3) + "], ebx\n";
                 } else {
-                    instr = "MOV EBX, [" + tokens.at(1) + "]\n";
-                    instr += "MOV [" + tokens.at(2) + "], EBX\n";
+                    instr = "mov ebx, [" + tokens.at(1) + "]\n";
+                    instr += "mov [" + tokens.at(2) + "], ebx\n";
                 }
                 break;
             case 10: // LOAD
                 // mov eax, [op1]
                 if(tokens.at(0).back() == ':') {
-                    instr = tokens.at(0) + " MOV EAX, [" + tokens.at(2) + "]\n";
+                    instr = tokens.at(0) + " mov eax, [" + tokens.at(2) + "]\n";
                 } else {
-                    instr = "MOV EAX, [" + tokens.at(1) + "]\n";
+                    instr = "mov eax, [" + tokens.at(1) + "]\n";
                 }
                 break;
             case 11: // STORE
                 // mov dword [op1], eax
                 if(tokens.at(0).back() == ':') {
-                    instr = tokens.at(0) + " MOV DWORD [" + tokens.at(2) + "], EAX\n";
+                    instr = tokens.at(0) + " mov dword [" + tokens.at(2) + "], eax\n";
                 } else {
-                    instr = "MOV DWORD [" + tokens.at(1) + "], EAX\n";
+                    instr = "mov dword [" + tokens.at(1) + "], eax\n";
                 }
                 break;
             case 12: // INPUT
                 break;
             case 13: // OUTPUT
+                // mov eax, 4
+                // mov ebx, 1
+                // mov ecx, op1
+                // mov edx, 1
+                // int 80h
+                if(tokens.at(0).back() == ':') { // nao funciona
+                    instr = tokens.at(0) + " mov eax, 4\nmov ebx, 1\nmov ecx, " + tokens.at(2) + "\nmov edx, 1\nint 80h\n";
+                } else {
+                    instr = "mov eax, 4\nmov ebx, 1\nmov ecx, " + tokens.at(1) + "\nmov edx, 1\nint 80h\n";
+                }
                 break;
             case 14: // STOP
                 // mov eax, 1
 	            // mov ebx, 0
 	            // int 80h
                 if(tokens.at(0).back() == ':') {
-                    instr = tokens.at(0) + " MOV EAX, 1\n";
+                    instr = tokens.at(0) + " mov eax, 1\n";
                 } else {
-                    instr = "MOV EAX, 1\n";
+                    instr = "mov eax, 1\n";
                 }
-                instr += "MOV EBX, 0\n";
-                instr += "INT 80H\n";
+                instr += "mov ebx, 0\n";
+                instr += "int 80h\n";
                 break;
             case 15: // INPUT_C
                 break;
@@ -183,18 +207,18 @@ void Translator(vector<string>* pr_content, string file_name) {
                     if(tokens.size() == 3) { // com arg
                         string::size_type pos = tokens.at(2).find('+');
                         if(pos != string::npos){ // arg com rotulo
-                            string size = processa_segundo_arg(tokens.at(2), '+'); // falta somar 1
-                            instr = tokens.at(0) + " RESD " + size + "\n";
+                            string size = processa_segundo_arg(tokens.at(2), '+');
+                            instr = tokens.at(0) + " resd " + size + "+1\n";
                         } else { // so arg
-                            instr = tokens.at(0) + " RESD " + tokens.at(2) + "\n";
+                            instr = tokens.at(0) + " resd " + tokens.at(2) + "\n";
                         }
                     } else { // sem arg
-                        instr = tokens.at(0) + " RESD 1\n";
+                        instr = tokens.at(0) + " resd 1\n";
                     }
                     section_bss->push_back(instr);
 
                 } else if (tokens.at(1) == "CONST") {
-                    instr = tokens.at(0) + " DB " + tokens.at(2) + "\n";
+                    instr = tokens.at(0) + " db " + tokens.at(2) + "\n";
                     section_data->push_back(instr);
                 }
                 break;
@@ -215,23 +239,24 @@ void Translator(vector<string>* pr_content, string file_name) {
     }
 
     // Criacao de Section .Data
-    output_file << "SECTION .DATA\
-                    \nMSG1 DB 'Quantidade de Bytes lidos/escritos = '\
-                    \nMSG1_SIZE EQU $-MSG1\
-                    \nNWLN DB 0DH, 0AH\
-                    \nNWLN_SIZE EQU $-NWLN\n";
+    // output_file << "SECTION .DATA\
+    //                 \nMSG1 DB 'Quantidade de Bytes lidos/escritos = '\
+    //                 \nMSG1_SIZE EQU $-MSG1\
+    //                 \nNWLN DB 0DH, 0AH\
+    //                 \nNWLN_SIZE EQU $-NWLN\n";
+    output_file << "section .data\n";
     for(long unsigned int i = 0; i < section_data->size(); i++) {
         output_file << (*section_data)[i];
     }
 
     // Criacao de Section .BSS
-    output_file << "\nSECTION .BSS\n";
+    output_file << "\nsection .bss\n";
     for(long unsigned int i = 0; i < section_bss->size(); i++) {
         output_file << (*section_bss)[i];
     }
 
     // Criacao de Section .Text
-    output_file << "\nSECTION .TEXT\nGLOBAL _START\n_START: ";
+    output_file << "\nsection .text\nglobal _start\n_start:\n";
     for(long unsigned int i = 0; i < section_text->size(); i++) {
         output_file << (*section_text)[i];
     }
