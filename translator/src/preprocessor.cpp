@@ -91,7 +91,7 @@ void ProcessEquIf(std::vector<std::string>* file_content, std::map <std::string,
 
         std::string s;
         // garante que instr do tipo copy tenha 2 tokens => |copy| |end1,end2|
-        if(temp_str == "COPY") {
+        if(temp_str == "COPY" || temp_str == "INPUT_S" || temp_str == "OUTPUT_S") {
             for (int j = 1; j < count_token; j++) {
                 s += token[j];
             }
@@ -107,7 +107,7 @@ void ProcessEquIf(std::vector<std::string>* file_content, std::map <std::string,
                 token[2] = (*equ_table).find(token[2])->second;
 
         // para instr de copy que tem rotulo, garante 3 tokens => |rotulo:| |copy| |end1,end2|
-        if(temp_str == "COPY") {
+        if(temp_str == "COPY" || temp_str == "INPUT_S" || temp_str == "OUTPUT_S") {
             for (int j = 2; j < count_token; j++) {
                 s += token[j];
             }

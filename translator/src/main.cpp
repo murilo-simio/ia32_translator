@@ -17,7 +17,9 @@ int main(int argc, char *argv[]) {
     input_file = argv[1];
 
     PreProcessor(input_file, pr_content);
-    Translator(pr_content);
+    int pos = input_file.find(".");
+    string file_name = input_file.substr(0 , pos);
+    Translator(pr_content, file_name + ".s");
 
     return 0;
 }
