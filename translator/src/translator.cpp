@@ -168,7 +168,7 @@ void Translator(vector<string>* pr_content, string file_name) {
                 }
                 break;
             case 12: // INPUT
-                instr = "push eax\npush d " + tokens.at(1) + "\ncall INPUT\npop eax\n";
+                instr = "push eax\npush dword " + tokens.at(1) + "\ncall INPUT\npop eax\n";
                 break;
             case 13: // OUTPUT
                 // mov eax, 4
@@ -259,13 +259,29 @@ void Translator(vector<string>* pr_content, string file_name) {
     }
 
     string instr;
+    // MSGOUT
+    instr = "MSGOUT\npush ebp\nmov ebp, esp\npush ebx\npush ecx\npush edx\npush esi\nmov eax, 4\nmov ebx, 1\nmov ecx, mensagem1\nmov edx, SIZEM1\nint 80h\nmov eax, [ebp+8]\nsub esp, 12\n";
+    instr += "mov ecx, esp\npush eax\npush ecx\ncall CONTAS\nadd esp, 12\nmov edx, eax\nmov eax, 4\nmov ebx, 1\nint 80h\nmov eax, 4\nmov ebx, 1\nmov ecx, mensagem2\nmov edx, SIZEM2\nint 80h\n";
+    instr += "pop esi\npop edx\npop ecx\npop ebx\npop ebp\nret 4\n";
+    section_text->push_back(instr);
+    // CONTA
+    instr = "CONTAS:\npush ebp\nmov ebp, esp\npush ebx\npush ecx\npush edx\npush esi\nmov eax, [ebp+12]\nmov esi, [ebp+8]\nmov byte [esi], 0x0\npush esi\ncmp eax, 0\njge CONTA2\npop ebx\nmov byte [esi], 0x2d\n";
+    instr += "inc esi\npush esi\nmov byte [esi], 0x0\nneg eax\n";
+    section_text->push_back(instr);
+    // CONTA2
+    instr = "CONTA2:\ncdq\nmov ebx, 10\nidiv ebx\nadd dl, 0x30\nCONTALOOP:\nmov cl, [esi]\ncmp cl, 0\njz CONTAFIM\nmov byte [esi], dl\nmov dl, cl\ninc esi\njmp CONTALOOP\n";
+    instr += "CONTAFIM:\nmov byte [esi], dl\ninc esi\nmov byte [esi], 0x0\npop esi\npush esi\ncmp eax, 0\njz CONTA3\njmp CONTA2\nCONTA3:\npop esi\nmov eax, 0\nmov esi, [ebp+8]\n";
+    instr += "CONTA3LOOP:\ncmp byte [esi], 0x0\njz CONTA3FIM\ninc eax\ninc esi\njmp CONTA3LOOP\nCONTA3FIM:\npop esi\npop edx\npop ecx\npop ebx\npop ebp\nret 8\n";
+    // INPUT
     instr = "INPUT:\npush ebp\nmov ebp, esp\nsub esp, 12\nmov ecx, esp\nmov eax, 3\nmov ebx, 0\nmov edx, 12\nint 80h\npush eax\npush eax\ncall MSGOUT";
     instr += "\npop eax\npush eax\nsub ebx, ebx\nmov edx, ecx\nmov ecx, eax\nxor esi, esi\nxor eax, eax\nmov bl, [edx]\ndec ecx\ncmp bl, 0x2d\njne IN_COUNT\nmov esi, 1\n inc edx\ndec ecx";
     instr += "\nIN_COUNT:\nmov bl, [edx]\ninc edx\nsub bl 0x30\npush ebx\nshl eax, 1\nmov ebx, eax\nshl eax, 2\nadd eax, ebx\npop ebx\nadd eax, ebx\nloop IN_COUNT";
     instr += "\nIN_FIM:\ncmp esi, 0\njz IN_FIM\nneg eax\nmov ebx, [ebp+8]\nmov [ebx],eax\npop eax\nadd esp,12\npop ebp\nret 4\n";
     section_text->push_back(instr);
+    // INPUT C
     instr = "INPUT_C:\npush ebp\nmov ebp, esp\nxor eax, eax\nxor ebx, ebx\nmov ecx, [ebp+8]\nmov edx, 1\nint 80h\npop ebp\nret";
     section_text->push_back(instr);
+    //INPUT STRING
     instr = "INPUT_S:\npush ebp\nmov ebp, esp\nxor edx, edx\nmov eax, 3\nmov ebx, 0\nmov ecx, [ebp+10]\nmov dx, [ebp+8]\nint 80h\npush eax\npush eax\ncall MSGOUT\npop eax\npop ebp\nret 10\n";
     section_text->push_back(instr);
 
