@@ -195,8 +195,18 @@ void Translator(vector<string>* pr_content, string file_name) {
                 instr += "int 80h\n";
                 break;
             case 15: // INPUT_C
+                if(tokens.at(0).back() == ':') {
+                    instr = tokens.at(0) + " push eax\npush dword " + tokens.at(2) + "\ncall INPUT_C\npop eax\n";
+                } else {
+                    instr = "push eax\npush dword " + tokens.at(1) + "\ncall INPUT_C\npop eax\n";
+                }
                 break;
             case 16: // OUTPUT_C
+                if(tokens.at(0).back() == ':') {
+                    instr = tokens.at(0) + " push eax\npush dword " + tokens.at(2) + "\ncall OUTPUT_C\npop eax\n";
+                } else {
+                    instr = "push eax\npush dword " + tokens.at(1) + "\ncall OUTPUT_C\npop eax\n";
+                }
                 break;
             case 17: // INPUT_S
                 instr = "push eax\npush d" + tokens.at(1) + "\npush word" + tokens.at(2) + "\ncall INPUT_S\npop eax\n";
@@ -286,13 +296,15 @@ void Translator(vector<string>* pr_content, string file_name) {
     instr = "INPUT_S:\npush ebp\nmov ebp, esp\nxor edx, edx\nmov eax, 3\nmov ebx, 0\nmov ecx, [ebp+10]\nmov dx, [ebp+8]\nint 80h\npush eax\npush eax\ncall MSGOUT\npop eax\npop ebp\nret 10\n\n";
     section_text->push_back(instr);
     // OUTPUT_S
-    instr = "OUTPUT_S:\npush ebp\nmov ebp, esp\nxor edx, edx\nmov eax, 4\nmov ebx, 1\nmov ecx [ebp+10]\nmov dx, [ebp+8]\nint 80h\npush eax\npush eax\ncall MSGOU\npop eax\npop ebp\nret 10\n\n";
+    instr = "OUTPUT_S:\npush ebp\nmov ebp, esp\nxor edx, edx\nmov eax, 4\nmov ebx, 1\nmov ecx [ebp+10]\nmov dx, [ebp+8]\nint 80h\npush eax\npush eax\ncall MSGOUT\npop eax\npop ebp\nret 10\n\n";
     section_text->push_back(instr);
     // OUTPUT
     instr = "OUTPUT:\npush ebp\nmov ebp esp\nmov eax, [ebp+8]\nsub esp, 12\nmov ecx, esp\npush eax\npush ecx\ncall DEC2HEX\npush eax\npush eax\nmov edx, eax\nmov eax, 4\nmov ebx, 1\nint 80h\nmov eax, 4\n";
     instr += "mov ebx, 1\nmov ecx, newLine\nmov edx SIZENEWLINE\nint 80h\ncall MSGOUT\npop eax\nadd esp, 12\npop ebp\nret 4\n\n";
     section_text->push_back(instr);
-    
+    // OUTPUT_C
+    instr = "OUTPUT_C:\npush ebp\nmov ebp, esp\nxor edx, edx\nmov eax, 4\nmov ebx, 1\nmov ecx, [ebp+8]\nmov edx, 1\nint 80h\npush eax\npush eax\ncall MSGOUT\npop eax\npop ebp\nret 4\n\n";
+
     // Criacao de Section .Text
     output_file << "\nsection .text\nglobal _start\n_start:\n";
     for(long unsigned int i = 0; i < section_text->size(); i++) {
