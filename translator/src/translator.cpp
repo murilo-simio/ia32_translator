@@ -302,8 +302,8 @@ void Translator(vector<string>* pr_content, string file_name) {
     // INPUT
     instr = "INPUT:\npush ebp\nmov ebp, esp\nsub esp, 12\nmov ecx, esp\nmov eax, 3\nmov ebx, 0\nmov edx, 12\nint 80h\npush eax\npush eax\ncall MSGOUT";
     instr += "\npop eax\npush eax\nsub ebx, ebx\nmov edx, ecx\nmov ecx, eax\nxor esi, esi\nxor eax, eax\nmov bl, [edx]\ndec ecx\ncmp bl, 0x2d\njne IN_COUNT\nmov esi, 1\ninc edx\ndec ecx\n";
-    instr += "\nIN_COUNT:\nmov bl, [edx]\ninc edx\nsub bl, 0x30\npush ebx\nshl eax, 1\nmov ebx, eax\nshl eax, 2\nadd eax, ebx\npop ebx\nadd eax, ebx\nloop IN_COUNT\n";
-    instr += "\nIN_FIM:\ncmp esi, 0\njz IN_FIM\nneg eax\nmov ebx, [ebp+8]\nmov [ebx],eax\npop eax\nadd esp,12\npop ebp\nret 4\n\n";
+    instr += "\nIN_COUNT:\nmov bl, [edx]\ninc edx\nsub bl, 0x30\npush ebx\nshl eax, 1\nmov ebx, eax\nshl eax, 2\nadd eax, ebx\npop ebx\nadd eax, ebx\nloop IN_COUNT\ncmp esi, 0\njz IN_FIM\nneg eax\n";
+    instr += "\nIN_FIM:\nmov ebx, [ebp+8]\nmov [ebx],eax\npop eax\nadd esp,12\npop ebp\nret 4\n\n";
     section_text->push_back(instr);
     // INPUT C
     instr = "INPUT_C:\npush ebp\nmov ebp, esp\nmov eax, 3\nmov ebx, 0\nmov ecx, [ebp+8]\nmov edx, 1\nint 80h\npush eax\npush eax\ncall MSGOUT\npop eax\npop ebp\nret\n\n";
