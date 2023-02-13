@@ -251,12 +251,15 @@ void Translator(vector<string>* pr_content, string file_name) {
         return;
     }
 
-    // Criacao de Section .Data
-    // output_file << "SECTION .DATA\
-    //                 \nMSG1 DB 'Quantidade de Bytes lidos/escritos = '\
-    //                 \nMSG1_SIZE EQU $-MSG1\
-    //                 \nNWLN DB 0DH, 0AH\
-    //                 \nNWLN_SIZE EQU $-NWLN\n";
+    string instr;
+    instr = "\nmensagem1 db 'Quandtidade de Bytes lidos/escritos = '";
+    instr += "\nSIZEM1 EQU $-mensagem1";
+    instr += "\nmensagem2 db '!', 0Dh, 0Ah";
+    instr += "\nSIZEM2 EQU $-mensagem2";
+    instr += "\nnewLine db 0Dh, 0Ah";
+    instr += "\nSIZENEWLINE EQU $-newLine";
+    section_data->push_back(instr);
+    
     output_file << "section .data\n";
     for(long unsigned int i = 0; i < section_data->size(); i++) {
         output_file << (*section_data)[i];
@@ -268,7 +271,6 @@ void Translator(vector<string>* pr_content, string file_name) {
         output_file << (*section_bss)[i];
     }
 
-    string instr;
     // MSGOUT
     instr = "MSGOUT\npush ebp\nmov ebp, esp\npush ebx\npush ecx\npush edx\npush esi\nmov eax, 4\nmov ebx, 1\nmov ecx, mensagem1\nmov edx, SIZEM1\nint 80h\nmov eax, [ebp+8]\nsub esp, 12\n";
     instr += "mov ecx, esp\npush eax\npush ecx\ncall DEC2HEX\nadd esp, 12\nmov edx, eax\nmov eax, 4\nmov ebx, 1\nint 80h\nmov eax, 4\nmov ebx, 1\nmov ecx, mensagem2\nmov edx, SIZEM2\nint 80h\n";
@@ -304,6 +306,7 @@ void Translator(vector<string>* pr_content, string file_name) {
     section_text->push_back(instr);
     // OUTPUT_C
     instr = "OUTPUT_C:\npush ebp\nmov ebp, esp\nxor edx, edx\nmov eax, 4\nmov ebx, 1\nmov ecx, [ebp+8]\nmov edx, 1\nint 80h\npush eax\npush eax\ncall MSGOUT\npop eax\npop ebp\nret 4\n\n";
+    section_text->push_back(instr);
 
     // Criacao de Section .Text
     output_file << "\nsection .text\nglobal _start\n_start:\n";
