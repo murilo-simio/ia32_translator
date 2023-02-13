@@ -2,9 +2,9 @@
 
 using namespace std;
 
-map<std::string, int> operacoes = 
+map<std::string, int> operacoes =
 {
-    {"ADD",       1},   
+    {"ADD",       1},
     {"SUB",       2},
     {"MUL",       3},
     {"DIV",       4},
@@ -29,7 +29,6 @@ void Translator(vector<string>* pr_content, string file_name) {
     vector<string>* section_bss  = new vector<string>();
     vector<string>* section_data = new vector<string>();
     vector<string>* section_text = new vector<string>();
-    bool in_int = 0, in_str = 0, in_char = 0;
 
     for(long unsigned int i = 0; i < pr_content->size(); i++) {
         istringstream str((*pr_content)[i]);
@@ -45,23 +44,23 @@ void Translator(vector<string>* pr_content, string file_name) {
                 op = operacoes[upper(token)]; // captura tipo de instr de cada linha
             }
 
-            if(upper(token) == "COPY") {   // instr do tipo copy recebe outro tratamento 
+            if(upper(token) == "COPY") {   // instr do tipo copy recebe outro tratamento
                 is_copy_instr = true;
                 tokens.push_back(upper(token));
-                continue;         
+                continue;
             }
-            
+
             if(is_copy_instr) {
                 string antes = processa_primeiro_arg(token, ',');
                 string depois = processa_segundo_arg(token, ',');
                 tokens.push_back(upper(antes));
-                tokens.push_back(upper(depois)); 
+                tokens.push_back(upper(depois));
                 continue;
             }
             tokens.push_back(upper(token));     // Transforma tudo em maiuscula
 
         }
-        
+
         // realiza conversao para ia32
         string instr;
         switch(op) {
@@ -273,7 +272,7 @@ void Translator(vector<string>* pr_content, string file_name) {
     instr += "\nnewLine db 0Dh, 0Ah";
     instr += "\nSIZENEWLINE EQU $-newLine\n";
     section_data->push_back(instr);
-    
+
     output_file << "section .data\n";
     for(long unsigned int i = 0; i < section_data->size(); i++) {
         output_file << (*section_data)[i];
