@@ -119,8 +119,6 @@ void ProcessEquIf(std::vector<std::string>* file_content, std::map <std::string,
 
     }
 
-    std::cout << "Fim do pre-processamento\n\n";
-
 }
 
 void FindEQU(std::vector<std::string>* file_content, std::map <std::string, std::string>* equ_table) {

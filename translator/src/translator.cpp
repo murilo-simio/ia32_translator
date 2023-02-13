@@ -171,15 +171,10 @@ void Translator(vector<string>* pr_content, string file_name) {
                 instr = "push eax\npush dword " + tokens.at(1) + "\ncall INPUT\npop eax\n";
                 break;
             case 13: // OUTPUT
-                // mov eax, 4
-                // mov ebx, 1
-                // mov ecx, op1
-                // mov edx, 1
-                // int 80h
                 if(tokens.at(0).back() == ':') { // nao funciona
-                    instr = tokens.at(0) + " mov eax, 4\nmov ebx, 1\nmov ecx, " + tokens.at(2) + "\nmov edx, 1\nint 80h\n";
+                    instr = tokens.at(0) + " push eax\npush dword " + tokens.at(2) + "\ncall OUTPUT\npop eax\n";
                 } else {
-                    instr = "mov eax, 4\nmov ebx, 1\nmov ecx, " + tokens.at(1) + "\nmov edx, 1\nint 80h\n";
+                    instr = "push eax\npush dword " + tokens.at(1) + "\ncall OUTPUT\npop eax\n";
                 }
                 break;
             case 14: // STOP
@@ -208,11 +203,30 @@ void Translator(vector<string>* pr_content, string file_name) {
                     instr = "push eax\npush dword " + tokens.at(1) + "\ncall OUTPUT_C\npop eax\n";
                 }
                 break;
-            case 17: // INPUT_S
-                instr = "push eax\npush d" + tokens.at(1) + "\npush word" + tokens.at(2) + "\ncall INPUT_S\npop eax\n";
+            case 17: // INPUT_S LABEL,QTD_BYTES
+            {
+                int token_size = tokens.size() - 1;
+                string label = processa_primeiro_arg(tokens.at(token_size), ',');
+                string bytes = processa_segundo_arg(tokens.at(token_size), ',');
+                if(tokens.at(0).back() == ':') {
+                    instr = tokens.at(0) + " push eax\npush dword " + label + "\npush word " + bytes + "\ncall INPUT_S\npop eax\n";
+                } else {
+                    instr = "push eax\npush dword " + label + "\npush word " + bytes + "\ncall INPUT_S\npop eax\n";
+                }
                 break;
-            case 18: // OUTPUT_S
+            }
+            case 18: // OUTPUT_S LABEL,QTD_BYTES
+            {
+                int token_size = tokens.size() - 1;
+                string label = processa_primeiro_arg(tokens.at(token_size), ',');
+                string bytes = processa_segundo_arg(tokens.at(token_size), ',');
+                if(tokens.at(0).back() == ':') {
+                    instr = tokens.at(0) + " push eax\npush dword " + label + "\npush word " + bytes + "\ncall OUTPUT_S\npop eax\n";
+                } else {
+                    instr = "push eax\npush dword " + label + "\npush word " + bytes + "\ncall OUTPUT_S\npop eax\n";
+                }
                 break;
+            }
             case -1:
                 //  Trata space e const
                 tokens.at(0).pop_back();
@@ -252,12 +266,12 @@ void Translator(vector<string>* pr_content, string file_name) {
     }
 
     string instr;
-    instr = "\nmensagem1 db 'Quandtidade de Bytes lidos/escritos = '";
+    instr = "mensagem1 db 'Quantidade de Bytes lidos/escritos = '";
     instr += "\nSIZEM1 EQU $-mensagem1";
     instr += "\nmensagem2 db '!', 0Dh, 0Ah";
     instr += "\nSIZEM2 EQU $-mensagem2";
     instr += "\nnewLine db 0Dh, 0Ah";
-    instr += "\nSIZENEWLINE EQU $-newLine";
+    instr += "\nSIZENEWLINE EQU $-newLine\n";
     section_data->push_back(instr);
     
     output_file << "section .data\n";
@@ -272,7 +286,7 @@ void Translator(vector<string>* pr_content, string file_name) {
     }
 
     // MSGOUT
-    instr = "MSGOUT\npush ebp\nmov ebp, esp\npush ebx\npush ecx\npush edx\npush esi\nmov eax, 4\nmov ebx, 1\nmov ecx, mensagem1\nmov edx, SIZEM1\nint 80h\nmov eax, [ebp+8]\nsub esp, 12\n";
+    instr = "\nMSGOUT:\npush ebp\nmov ebp, esp\npush ebx\npush ecx\npush edx\npush esi\nmov eax, 4\nmov ebx, 1\nmov ecx, mensagem1\nmov edx, SIZEM1\nint 80h\nmov eax, [ebp+8]\nsub esp, 12\n";
     instr += "mov ecx, esp\npush eax\npush ecx\ncall DEC2HEX\nadd esp, 12\nmov edx, eax\nmov eax, 4\nmov ebx, 1\nint 80h\nmov eax, 4\nmov ebx, 1\nmov ecx, mensagem2\nmov edx, SIZEM2\nint 80h\n";
     instr += "pop esi\npop edx\npop ecx\npop ebx\npop ebp\nret 4\n\n";
     section_text->push_back(instr);
@@ -287,25 +301,25 @@ void Translator(vector<string>* pr_content, string file_name) {
     section_text->push_back(instr);
     // INPUT
     instr = "INPUT:\npush ebp\nmov ebp, esp\nsub esp, 12\nmov ecx, esp\nmov eax, 3\nmov ebx, 0\nmov edx, 12\nint 80h\npush eax\npush eax\ncall MSGOUT";
-    instr += "\npop eax\npush eax\nsub ebx, ebx\nmov edx, ecx\nmov ecx, eax\nxor esi, esi\nxor eax, eax\nmov bl, [edx]\ndec ecx\ncmp bl, 0x2d\njne IN_COUNT\nmov esi, 1\n inc edx\ndec ecx\n";
-    instr += "\nIN_COUNT:\nmov bl, [edx]\ninc edx\nsub bl 0x30\npush ebx\nshl eax, 1\nmov ebx, eax\nshl eax, 2\nadd eax, ebx\npop ebx\nadd eax, ebx\nloop IN_COUNT\n";
-    instr += "\nIN_FIM:\ncmp esi, 0\njz IN_FIM\nneg eax\nmov ebx, [ebp+8]\nmov [ebx],eax\npop eax\nadd esp,12\npop ebp\nret 4\n";
+    instr += "\npop eax\npush eax\nsub ebx, ebx\nmov edx, ecx\nmov ecx, eax\nxor esi, esi\nxor eax, eax\nmov bl, [edx]\ndec ecx\ncmp bl, 0x2d\njne IN_COUNT\nmov esi, 1\ninc edx\ndec ecx\n";
+    instr += "\nIN_COUNT:\nmov bl, [edx]\ninc edx\nsub bl, 0x30\npush ebx\nshl eax, 1\nmov ebx, eax\nshl eax, 2\nadd eax, ebx\npop ebx\nadd eax, ebx\nloop IN_COUNT\n";
+    instr += "\nIN_FIM:\ncmp esi, 0\njz IN_FIM\nneg eax\nmov ebx, [ebp+8]\nmov [ebx],eax\npop eax\nadd esp,12\npop ebp\nret 4\n\n";
     section_text->push_back(instr);
     // INPUT C
-    instr = "INPUT_C:\npush ebp\nmov ebp, esp\nxor eax, eax\nxor ebx, ebx\nmov ecx, [ebp+8]\nmov edx, 1\nint 80h\npop ebp\nret\n\n";
+    instr = "INPUT_C:\npush ebp\nmov ebp, esp\nmov eax, 3\nmov ebx, 0\nmov ecx, [ebp+8]\nmov edx, 1\nint 80h\npush eax\npush eax\ncall MSGOUT\npop eax\npop ebp\nret\n\n";
     section_text->push_back(instr);
     //INPUT STRING
-    instr = "INPUT_S:\npush ebp\nmov ebp, esp\nxor edx, edx\nmov eax, 3\nmov ebx, 0\nmov ecx, [ebp+10]\nmov dx, [ebp+8]\nint 80h\npush eax\npush eax\ncall MSGOUT\npop eax\npop ebp\nret 10\n\n";
+    instr = "INPUT_S:\npush ebp\nmov ebp, esp\nxor edx, edx\nmov eax, 3\nmov ebx, 0\nmov ecx, [ebp+10]\nmov edx, [ebp+8]\nint 80h\npush eax\npush eax\ncall MSGOUT\npop eax\npop ebp\nret 10\n\n";
     section_text->push_back(instr);
     // OUTPUT_S
-    instr = "OUTPUT_S:\npush ebp\nmov ebp, esp\nxor edx, edx\nmov eax, 4\nmov ebx, 1\nmov ecx [ebp+10]\nmov dx, [ebp+8]\nint 80h\npush eax\npush eax\ncall MSGOUT\npop eax\npop ebp\nret 10\n\n";
+    instr = "OUTPUT_S:\npush ebp\nmov ebp, esp\nxor edx, edx\nmov eax, 4\nmov ebx, 1\nmov ecx, [ebp+10]\nmov edx, [ebp+8]\nint 80h\npush eax\npush eax\ncall MSGOUT\npop eax\npop ebp\nret 10\n\n";
     section_text->push_back(instr);
     // OUTPUT
-    instr = "OUTPUT:\npush ebp\nmov ebp esp\nmov eax, [ebp+8]\nsub esp, 12\nmov ecx, esp\npush eax\npush ecx\ncall DEC2HEX\npush eax\npush eax\nmov edx, eax\nmov eax, 4\nmov ebx, 1\nint 80h\nmov eax, 4\n";
-    instr += "mov ebx, 1\nmov ecx, newLine\nmov edx SIZENEWLINE\nint 80h\ncall MSGOUT\npop eax\nadd esp, 12\npop ebp\nret 4\n\n";
+    instr = "OUTPUT:\npush ebp\nmov ebp, esp\nmov eax, [ebp+8]\nsub esp, 12\nmov ecx, esp\npush eax\npush ecx\ncall DEC2HEX\npush eax\npush eax\nmov edx, eax\nmov eax, 4\nmov ebx, 1\nint 80h\nmov eax, 4\n";
+    instr += "mov ebx, 1\nmov ecx, newLine\nmov edx, SIZENEWLINE\nint 80h\ncall MSGOUT\npop eax\nadd esp, 12\npop ebp\nret 4\n\n";
     section_text->push_back(instr);
     // OUTPUT_C
-    instr = "OUTPUT_C:\npush ebp\nmov ebp, esp\nxor edx, edx\nmov eax, 4\nmov ebx, 1\nmov ecx, [ebp+8]\nmov edx, 1\nint 80h\npush eax\npush eax\ncall MSGOUT\npop eax\npop ebp\nret 4\n\n";
+    instr = "OUTPUT_C:\npush ebp\nmov ebp, esp\nxor edx, edx\nmov eax, 4\nmov ebx, 1\nmov ecx, [ebp+8]\nmov edx, 1\nint 80h\nmov eax, 4\nmov ebx, 1\nmov ecx, newLine\nmov edx, SIZENEWLINE\nint 80h\npush eax\npush eax\ncall MSGOUT\npop eax\npop ebp\nret 4\n\n";
     section_text->push_back(instr);
 
     // Criacao de Section .Text
@@ -313,6 +327,8 @@ void Translator(vector<string>* pr_content, string file_name) {
     for(long unsigned int i = 0; i < section_text->size(); i++) {
         output_file << (*section_text)[i];
     }
+
+    cout << "Conversao finalizada!\n\n";
 
 }
 
