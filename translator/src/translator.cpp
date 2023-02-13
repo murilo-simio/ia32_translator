@@ -208,9 +208,9 @@ void Translator(vector<string>* pr_content, string file_name) {
                 string label = processa_primeiro_arg(tokens.at(token_size), ',');
                 string bytes = processa_segundo_arg(tokens.at(token_size), ',');
                 if(tokens.at(0).back() == ':') {
-                    instr = tokens.at(0) + " push eax\npush dword " + label + "\npush word " + bytes + "\ncall INPUT_S\npop eax\n";
+                    instr = tokens.at(0) + " push eax\npush word " + bytes + "\npush dword " + label + "\ncall INPUT_S\npop eax\n";
                 } else {
-                    instr = "push eax\npush dword " + label + "\npush word " + bytes + "\ncall INPUT_S\npop eax\n";
+                    instr = "push eax\npush word " + bytes + "\npush dword " + label + "\ncall INPUT_S\npop eax\n";
                 }
                 break;
             }
@@ -220,9 +220,9 @@ void Translator(vector<string>* pr_content, string file_name) {
                 string label = processa_primeiro_arg(tokens.at(token_size), ',');
                 string bytes = processa_segundo_arg(tokens.at(token_size), ',');
                 if(tokens.at(0).back() == ':') {
-                    instr = tokens.at(0) + " push eax\npush dword " + label + "\npush word " + bytes + "\ncall OUTPUT_S\npop eax\n";
+                    instr = tokens.at(0) + " push eax\npush word " + bytes + "\npush dword " + label + "\ncall OUTPUT_S\npop eax\n";
                 } else {
-                    instr = "push eax\npush dword " + label + "\npush word " + bytes + "\ncall OUTPUT_S\npop eax\n";
+                    instr = "push eax\npush word " + bytes + "\npush dword " + label + "\ncall OUTPUT_S\npop eax\n";
                 }
                 break;
             }
