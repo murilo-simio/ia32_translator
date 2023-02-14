@@ -34,6 +34,7 @@ void Translator(vector<string>* pr_content, string file_name) {
         istringstream str((*pr_content)[i]);
         string token;
         bool is_copy_instr = false;
+        bool is_const_instr = false;
         int op = -1;
 
         tokens.clear();
@@ -47,6 +48,17 @@ void Translator(vector<string>* pr_content, string file_name) {
             if(upper(token) == "COPY") {   // instr do tipo copy recebe outro tratamento
                 is_copy_instr = true;
                 tokens.push_back(upper(token));
+                continue;
+            }
+
+            if(upper(token) == "CONST") {
+                is_const_instr = true;
+                tokens.push_back(upper(token));
+                continue;
+            }
+
+            if(is_const_instr) {
+                tokens.push_back(token);
                 continue;
             }
 
@@ -244,7 +256,11 @@ void Translator(vector<string>* pr_content, string file_name) {
                     section_bss->push_back(instr);
 
                 } else if (tokens.at(1) == "CONST") {
-                    instr = tokens.at(0) + " db " + tokens.at(2) + "\n";
+                    if(is_number(tokens.at(2))) {
+                        instr = tokens.at(0) + " dd " + tokens.at(2) + "\n";    
+                    } else {
+                        instr = tokens.at(0) + " db " + tokens.at(2) + "\n";
+                    }
                     section_data->push_back(instr);
                 }
                 break;
@@ -354,4 +370,12 @@ string processa_segundo_arg(string const& s, char t){
     }else{
         return s;
     }
+}
+
+bool is_number(string const& s) {
+    for(char const &car : s) {
+        if(isdigit(car) == 0)
+            return false;
+    }
+    return true;
 }
