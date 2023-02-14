@@ -173,7 +173,7 @@ void Translator(vector<string>* pr_content, string file_name) {
                 if(tokens.at(0).back() == ':') { // nao funciona
                     instr = tokens.at(0) + " push eax\npush dword " + tokens.at(2) + "\ncall OUTPUT\npop eax\n";
                 } else {
-                    instr = "push eax\npush dword " + tokens.at(1) + "\ncall OUTPUT\npop eax\n";
+                    instr = "push eax\npush dword [d" + tokens.at(1) + "]\ncall OUTPUT\npop eax\n";
                 }
                 break;
             case 14: // STOP
