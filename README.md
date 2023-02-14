@@ -5,14 +5,14 @@
 
 ### Para buildar o programa
 ```
-cd montador && make clean all
+cd translator && make clean all
 ```
 
 ### Para rodar o programa
 ```
 ./build/apps/translator <arquivo_de_entrada.asm>
 
-nasm -f elf saida.o <arquivo_de_entrada.s>
+nasm -f elf -o saida.o <arquivo_de_saida.s>
 
 ld -m elf_i386 -o saida saida.o
 ```
